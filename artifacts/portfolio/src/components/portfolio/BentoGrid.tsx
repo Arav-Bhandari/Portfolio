@@ -22,8 +22,10 @@ interface CardProps {
 const Card: React.FC<CardProps> = ({ className = '', children }) => (
   <div
     className={
-      'rounded-2xl bg-white border border-slate-200 shadow-sm ' +
-      'transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 p-6 md:p-8 ' +
+      'rounded-2xl bg-white border border-slate-200 ' +
+      'shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] ' +
+      'transition-all duration-300 hover:shadow-[0_4px_25px_-3px_rgba(0,0,0,0.1),0_15px_30px_-2px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 ' +
+      'p-6 md:p-8 ' +
       className
     }
   >
@@ -89,6 +91,14 @@ export function BentoGrid() {
                 <Mail strokeWidth={ICON_STROKE} size={ICON_SIZE} />
               </a>
             </div>
+
+            <a
+              href={`mailto:${identity.socials.email}`}
+              className="mt-6 inline-flex items-center gap-2 bg-slate-900 text-white hover:bg-slate-800 px-6 py-2 rounded-full text-sm font-medium transition-colors w-fit"
+            >
+              <Mail strokeWidth={ICON_STROKE} size={ICON_SIZE} />
+              Get in Touch
+            </a>
           </Card>
 
           {/* Portrait — 4 cols */}
@@ -126,7 +136,7 @@ export function BentoGrid() {
               operators use every day.
             </p>
 
-            <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
+            <div className="flex flex-wrap gap-1.5 pt-2">
               {flagship.stack.map((tech) => (
                 <span
                   key={tech}
@@ -136,10 +146,17 @@ export function BentoGrid() {
                 </span>
               ))}
             </div>
+
+            <a
+              href={`mailto:${identity.socials.email}?subject=MVP%20Development%20Inquiry`}
+              className="text-slate-900 font-semibold text-sm border-b-2 border-slate-900 hover:border-slate-400 pb-0.5 transition-all inline-block mt-4 w-fit"
+            >
+              Inquire about MVP Development →
+            </a>
           </Card>
 
           {/* Recognition — 4 cols */}
-          <Card className="md:col-span-4 flex flex-col gap-4">
+          <Card className="md:col-span-4 flex flex-col gap-4 md:!p-10">
             <SectionLabel>Recognition</SectionLabel>
             <ul className="space-y-4">
               {accolades.map((a) => (
@@ -182,7 +199,7 @@ export function BentoGrid() {
           ))}
 
           {/* Focus — 6 cols */}
-          <Card className="md:col-span-6 flex flex-col gap-4">
+          <Card className="md:col-span-6 flex flex-col gap-4 md:!p-10">
             <SectionLabel>Focus</SectionLabel>
             <ul className="space-y-2">
               {specializations.map((spec) => (
@@ -194,7 +211,7 @@ export function BentoGrid() {
           </Card>
 
           {/* Academic & Service — 6 cols */}
-          <Card className="md:col-span-6 flex flex-col gap-4">
+          <Card className="md:col-span-6 flex flex-col gap-4 md:!p-10">
             <SectionLabel>Academic &amp; Service</SectionLabel>
             <ul className="space-y-2">
               {academics.map((item) => (
@@ -214,7 +231,7 @@ export function BentoGrid() {
             </span>
             {skills.map((s) => s.name).join(' · ')}
           </p>
-          <p>© 2026 {identity.name}</p>
+          <p>© 2026 {identity.name} · LogicStep AI</p>
         </footer>
       </div>
     </main>
