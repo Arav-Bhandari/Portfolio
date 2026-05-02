@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github, Linkedin, Mail } from 'lucide-react';
+import { Github, Linkedin, Mail, MapPin } from 'lucide-react';
 import {
   identity,
   projects,
@@ -11,7 +11,8 @@ import {
 import heroPortrait from '@assets/IMG_6864_1777758948574.JPEG';
 import logicStepLogo from '@assets/ai_dojo_2_2_1777758948573.PNG';
 
-const ICON_STROKE = 1.5;
+const ICON_STROKE = 1.25;
+const ICON_SIZE = 18;
 
 interface CardProps {
   className?: string;
@@ -22,7 +23,7 @@ const Card: React.FC<CardProps> = ({ className = '', children }) => (
   <div
     className={
       'rounded-2xl bg-white border border-slate-200 shadow-sm ' +
-      'transition-shadow duration-300 hover:shadow-md p-6 md:p-8 ' +
+      'transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 p-6 md:p-8 ' +
       className
     }
   >
@@ -31,7 +32,7 @@ const Card: React.FC<CardProps> = ({ className = '', children }) => (
 );
 
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
     {children}
   </p>
 );
@@ -54,10 +55,14 @@ export function BentoGrid() {
               <p className="mt-3 text-lg md:text-xl font-medium text-slate-700">
                 {identity.tagline}
               </p>
-              <p className="mt-2 text-base text-slate-500">{identity.location}</p>
             </div>
 
-            <div className="mt-8 flex items-center gap-5">
+            <div className="mt-8 flex items-center gap-4 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-xs font-medium">
+                <MapPin strokeWidth={ICON_STROKE} size={14} />
+                {identity.location}
+              </span>
+              <span className="h-4 w-px bg-slate-200" aria-hidden="true" />
               <a
                 href={identity.socials.github}
                 target="_blank"
@@ -65,7 +70,7 @@ export function BentoGrid() {
                 aria-label="GitHub"
                 className="text-slate-500 hover:text-slate-900 transition-colors"
               >
-                <Github strokeWidth={ICON_STROKE} className="w-5 h-5" />
+                <Github strokeWidth={ICON_STROKE} size={ICON_SIZE} />
               </a>
               <a
                 href={identity.socials.linkedin}
@@ -74,14 +79,14 @@ export function BentoGrid() {
                 aria-label="LinkedIn"
                 className="text-slate-500 hover:text-slate-900 transition-colors"
               >
-                <Linkedin strokeWidth={ICON_STROKE} className="w-5 h-5" />
+                <Linkedin strokeWidth={ICON_STROKE} size={ICON_SIZE} />
               </a>
               <a
                 href={`mailto:${identity.socials.email}`}
                 aria-label="Email"
                 className="text-slate-500 hover:text-slate-900 transition-colors"
               >
-                <Mail strokeWidth={ICON_STROKE} className="w-5 h-5" />
+                <Mail strokeWidth={ICON_STROKE} size={ICON_SIZE} />
               </a>
             </div>
           </Card>
@@ -121,11 +126,11 @@ export function BentoGrid() {
               operators use every day.
             </p>
 
-            <div className="flex flex-wrap gap-2 mt-auto pt-2">
+            <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
               {flagship.stack.map((tech) => (
                 <span
                   key={tech}
-                  className="px-2.5 py-1 rounded-md bg-slate-50 text-slate-700 text-xs font-medium border border-slate-200"
+                  className="text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md"
                 >
                   {tech}
                 </span>
@@ -167,7 +172,7 @@ export function BentoGrid() {
                 {project.stack.slice(0, 3).map((tech) => (
                   <span
                     key={tech}
-                    className="px-2 py-0.5 rounded-md bg-slate-50 text-slate-600 text-[11px] font-medium border border-slate-200"
+                    className="text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md"
                   >
                     {tech}
                   </span>
