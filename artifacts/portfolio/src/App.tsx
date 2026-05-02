@@ -9,7 +9,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-[100dvh] bg-background text-foreground selection:bg-primary selection:text-primary-foreground dark">
+        <div className="min-h-[100dvh] bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
           <BentoGrid />
         </div>
         <Toaster />
