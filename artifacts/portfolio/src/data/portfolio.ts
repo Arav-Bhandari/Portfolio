@@ -1,6 +1,30 @@
 import React from 'react';
 import { Trophy, Award, Medal } from 'lucide-react';
 
+export interface Identity {
+  name: string;
+  tagline: string;
+  bio: string;
+  location: string;
+  socials: {
+    github: string;
+    linkedin: string;
+    email: string;
+  };
+}
+
+export const identity: Identity = {
+  name: "Arav Bhandari",
+  tagline: "CEO & Co-Founder, LogicStep AI",
+  bio: "Founder, engineer, freelancer, and operator building MVPs in legal, real-estate, AI, and Education.",
+  location: "Building from Plain City, OH",
+  socials: {
+    github: "https://github.com/Arav-Bhandari/",
+    linkedin: "https://www.linkedin.com/in/arav-bhandari/",
+    email: "bhandariarav10@gmail.com",
+  },
+};
+
 export interface Project {
   id: string;
   title: string;
