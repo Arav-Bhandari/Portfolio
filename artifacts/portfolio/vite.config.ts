@@ -11,12 +11,12 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-// Use Replit's BASE_PATH when running inside the Replit dev preview (path-based routing).
-// Fall back to "./" so production builds work on GitHub Pages and any static subpath host.
-const basePath = process.env.BASE_PATH ?? "./";
+// Replit dev preview uses path-based routing via BASE_PATH (e.g. "/portfolio/").
+// Production builds target GitHub Pages at the "/Portfolio/" subpath.
+const basePath = process.env.BASE_PATH ?? "/Portfolio/";
 
-export default defineConfig({
-  base: basePath,
+export default defineConfig(async ({ command }) => ({
+  base: command === "build" ? "/Portfolio/" : basePath,
   plugins: [
     react(),
     tailwindcss(),
@@ -44,7 +44,7 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
   },
   server: {
@@ -61,4 +61,4 @@ export default defineConfig({
     host: "0.0.0.0",
     allowedHosts: true,
   },
-});
+}));
