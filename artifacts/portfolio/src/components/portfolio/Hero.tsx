@@ -17,11 +17,14 @@ export function Hero() {
       "transition-all duration-500 ease-out delay-100"
     )}>
       <div className="flex-1 space-y-4 z-10">
-        <div className="space-y-1">
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
-            CEO & Co-Founder, LogicStep AI
+        <div className="space-y-2">
+          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground">
+            Aarav Sharma
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-base md:text-lg font-medium text-primary">
+            CEO &amp; Co-Founder, LogicStep AI
+          </p>
+          <p className="text-muted-foreground text-base md:text-lg max-w-xl">
             Founder, engineer, and operator building MVPs in legal, real-estate, and AI.
           </p>
         </div>
