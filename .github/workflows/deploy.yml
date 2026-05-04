@@ -2,7 +2,7 @@ name: Deploy Portfolio
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -23,23 +23,23 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 9 # Matches your likely local version
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build portfolio
-        run: pnpm --filter @workspace/portfolio build
+        run: pnpm run build
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: artifacts/portfolio/dist
-
+          path: dist # Vite outputs here, not in artifacts/
+          
   deploy:
     name: Deploy
     needs: build
@@ -48,5 +48,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/deploy-pages@v4
-        id: deploy
+      - id: deploy
+        uses: actions/deploy-pages@v4
