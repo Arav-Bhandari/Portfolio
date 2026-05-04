@@ -23,7 +23,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9 # Matches your likely local version
+          version: 9
 
       - uses: actions/setup-node@v4
         with:
@@ -34,19 +34,21 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build portfolio
-        run: pnpm run build
+        # This specifically builds ONLY the portfolio project
+        run: pnpm --filter @workspace/portfolio build
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: dist # Vite outputs here, not in artifacts/
-          
+          # Points to the specific dist folder inside the artifacts directory
+          path: artifacts/portfolio/dist
+
   deploy:
     name: Deploy
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - id: deploy
         uses: actions/deploy-pages@v4
