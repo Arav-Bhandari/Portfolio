@@ -2,7 +2,7 @@
 
 @theme inline {
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
 }
 
 @layer base {
@@ -15,7 +15,7 @@
   }
 
   html, body {
-    background-color: #050505;
+    background-color: #060606;
     color: #f1f5f9;
     font-family: var(--font-sans);
     font-feature-settings: 'cv11', 'ss01';
@@ -29,16 +29,24 @@
   }
 
   ::-webkit-scrollbar {
-    width: 3px;
+    width: 2px;
   }
   ::-webkit-scrollbar-track {
-    background: #050505;
+    background: #060606;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 2px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.16);
   }
+}
+
+@layer utilities {
+  .col-buffer { grid-column: 1; }
+  .col-label  { grid-column: 2 / span 2; }
+  .col-head   { grid-column: 2 / span 9; }
+  .col-body   { grid-column: 5 / span 7; }
+  .col-full   { grid-column: 2 / span 10; }
 }

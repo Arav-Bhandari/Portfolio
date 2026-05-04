@@ -5,6 +5,8 @@ import {
   useTransform,
   useInView,
   AnimatePresence,
+  useMotionValue,
+  useSpring,
 } from 'framer-motion';
 import { Github, Linkedin, Mail, ArrowUpRight, ChevronDown } from 'lucide-react';
 
@@ -17,26 +19,47 @@ import hydraTickets from '@assets/hydra-tickets.jpg';
 import founderTeam from '@assets/founder-team.jpg';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const EMAIL = 'bhandariarav10@gmail.com';
-const GITHUB = 'https://github.com/Arav-Bhandari/';
+const EMAIL    = 'bhandariarav10@gmail.com';
+const GITHUB   = 'https://github.com/Arav-Bhandari/';
 const LINKEDIN = 'https://www.linkedin.com/in/arav-bhandari/';
 
-// ─── Animation variants ───────────────────────────────────────────────────────
-const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } };
-const fadeIn  = { hidden: { opacity: 0 },         show: { opacity: 1 } };
+// ─── Animation config ─────────────────────────────────────────────────────────
+const ease = [0.16, 1, 0.3, 1] as const;
+const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 
-const stagger = (delay = 0, staggerChildren = 0.08) => ({
+const stagger = (delay = 0, staggerChildren = 0.07) => ({
   hidden: {},
   show: { transition: { delayChildren: delay, staggerChildren } },
 });
 
-const ease = [0.25, 0.1, 0.25, 1] as const;
-
-// ─── Silver button gradient ───────────────────────────────────────────────────
+// ─── Silver CTA button ────────────────────────────────────────────────────────
 const SILVER_BTN =
-  'inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-slate-900 ' +
+  'inline-flex items-center gap-2 rounded-sm px-5 py-2.5 text-sm font-semibold text-slate-900 ' +
   'bg-gradient-to-r from-slate-100 via-slate-200 to-slate-300 ' +
-  'hover:from-white hover:to-slate-200 transition-all duration-200 shadow-sm';
+  'hover:from-white hover:to-slate-200 transition-all duration-200';
+
+// ─── ScrollProgress ───────────────────────────────────────────────────────────
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll();
+  const scaleY = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+
+  return (
+    <div className="fixed right-5 top-0 z-50 h-screen w-px bg-white/[0.06] hidden lg:block">
+      <motion.div
+        style={{ scaleY, transformOrigin: 'top' }}
+        className="absolute inset-0 bg-white/30"
+      />
+      {/* Tick marks */}
+      {[0.25, 0.5, 0.75].map((p) => (
+        <div
+          key={p}
+          className="absolute right-0 w-1.5 h-px bg-white/10"
+          style={{ top: `${p * 100}%` }}
+        />
+      ))}
+    </div>
+  );
+}
 
 // ─── MagneticButton ───────────────────────────────────────────────────────────
 interface MagBtnProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -52,25 +75,25 @@ function MagneticButton({ children, className = '', as: _tag = 'button', href, o
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    setPos({ x: (e.clientX - (r.left + r.width / 2)) * 0.25, y: (e.clientY - (r.top + r.height / 2)) * 0.25 });
+    setPos({ x: (e.clientX - (r.left + r.width / 2)) * 0.22, y: (e.clientY - (r.top + r.height / 2)) * 0.22 });
   };
   const shared = {
     ref: ref as any,
     onMouseMove: move,
     onMouseLeave: () => setPos({ x: 0, y: 0 }),
     animate: pos,
-    transition: { type: 'spring' as const, stiffness: 220, damping: 20 },
+    transition: { type: 'spring' as const, stiffness: 260, damping: 22 },
     className,
   };
   if (href) return <motion.a href={href} {...shared}>{children}</motion.a>;
   return <motion.button onClick={onClick} {...(rest as any)} {...shared}>{children}</motion.button>;
 }
 
-// ─── FloatingNav (glass only here) ───────────────────────────────────────────
+// ─── FloatingNav ─────────────────────────────────────────────────────────────
 function FloatingNav() {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
-    const h = () => setVisible(window.scrollY > 100);
+    const h = () => setVisible(window.scrollY > 120);
     window.addEventListener('scroll', h, { passive: true });
     return () => window.removeEventListener('scroll', h);
   }, []);
@@ -83,38 +106,34 @@ function FloatingNav() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -64, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-          className="fixed top-5 left-1/2 z-50 -translate-x-1/2 flex items-center gap-1 rounded-full px-2.5 py-2"
+          className="fixed top-5 left-1/2 z-50 -translate-x-1/2 flex items-center gap-1 px-3 py-2"
           style={{
-            background: 'rgba(10,10,10,0.72)',
-            border: '1px solid rgba(255,255,255,0.10)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            background: 'rgba(6,6,6,0.78)',
+            border: '1px solid rgba(255,255,255,0.09)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+            borderRadius: '4px',
           }}
         >
-          <span className="pl-2 pr-3 font-mono text-[11px] font-semibold tracking-widest text-white/30">AB</span>
-          <span className="h-3.5 w-px bg-white/10" />
+          <span className="pl-1 pr-3 font-mono text-[10px] font-semibold tracking-widest text-white/25">AB</span>
+          <span className="h-3.5 w-px bg-white/08" />
           {[
             { label: 'LogicStep', href: '#logicstep' },
-            { label: 'Hydra',     href: '#hydra' },
-            { label: 'Journal',   href: '#journal' },
-            { label: 'Services',  href: '#services' },
+            { label: 'Hydra',     href: '#hydra'     },
+            { label: 'Journal',   href: '#journal'   },
+            { label: 'Services',  href: '#services'  },
           ].map((l) => (
             <a
               key={l.label}
               href={l.href}
-              className="rounded-full px-3.5 py-1.5 text-[12px] font-medium text-white/45
-                         transition-all duration-150 hover:bg-white/[0.07] hover:text-white/90"
+              className="px-3.5 py-1.5 font-mono text-[11px] text-white/40 transition-all duration-150 hover:text-white/80"
             >
               {l.label}
             </a>
           ))}
-          <span className="h-3.5 w-px bg-white/10 mx-0.5" />
-          <MagneticButton
-            className={`${SILVER_BTN} !px-4 !py-1.5 !text-xs`}
-            href={`mailto:${EMAIL}`}
-            as="a"
-          >
+          <span className="h-3.5 w-px bg-white/08 mx-0.5" />
+          <MagneticButton className={`${SILVER_BTN} !px-3.5 !py-1.5 !text-[11px] !rounded-sm`} href={`mailto:${EMAIL}`} as="a">
             Hire Me
           </MagneticButton>
         </motion.nav>
@@ -123,13 +142,67 @@ function FloatingNav() {
   );
 }
 
-// ─── SectionLabel ─────────────────────────────────────────────────────────────
-function SectionLabel({ num, label }: { num: string; label: string }) {
+// ─── AnimatedDivider — draws the 2px border left→right on scroll ───────────────
+function AnimatedDivider({ index, label }: { index: string; label: string }) {
   return (
-    <div className="mb-7 flex items-center gap-3">
-      <span className="font-mono text-[10px] text-white/20">{num}</span>
-      <span className="h-px w-6 bg-white/12" />
-      <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/30">{label}</span>
+    <div className="relative mx-auto max-w-7xl px-6 md:px-12">
+      <div className="relative flex items-center gap-4 py-0">
+        <motion.div
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 1.4, ease }}
+          style={{ transformOrigin: 'left' }}
+          className="h-0.5 flex-1 bg-white/10"
+        />
+        <motion.span
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.9, duration: 0.5 }}
+          className="shrink-0 font-mono text-[10px] uppercase tracking-[0.22em] text-white/15"
+        >
+          {index} // {label}
+        </motion.span>
+      </div>
+    </div>
+  );
+}
+
+// ─── SectionIndex ─────────────────────────────────────────────────────────────
+function SectionIndex({ num, label }: { num: string; label: string }) {
+  return (
+    <div className="flex items-center gap-3 mb-8">
+      <span className="font-mono text-[11px] font-semibold text-white/20 tabular-nums">{num}</span>
+      <span className="h-px w-5 bg-white/10" />
+      <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/25">{label}</span>
+    </div>
+  );
+}
+
+// ─── MonorepoBox ──────────────────────────────────────────────────────────────
+function MonorepoBox() {
+  return (
+    <div
+      className="rounded-sm p-5 overflow-hidden"
+      style={{ background: '#0A0A0A', border: '1.5px solid rgba(255,255,255,0.10)' }}
+    >
+      <div className="mb-3 flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-white/15" />
+        <span className="h-2 w-2 rounded-full bg-white/15" />
+        <span className="h-2 w-2 rounded-full bg-white/15" />
+        <span className="ml-2 font-mono text-[10px] text-white/20">workspace://logicstep</span>
+      </div>
+      <pre className="font-mono text-[11px] leading-[1.8] text-white/50 overflow-x-auto">
+{`@workspace/logicstep
+├── frontend/          # React + Vite (SPA)
+│   ├── src/pages/
+│   └── src/components/
+└── api-server/        # Deno 2 + Hono v4
+    ├── src/routes/    # REST endpoints
+    ├── src/db/        # postgres.js
+    └── src/grading/   # DeepSeek V3 SSE`}
+      </pre>
     </div>
   );
 }
@@ -139,38 +212,32 @@ interface ArchRow { component: string; technology: string; note: string; }
 
 function ArchDiagram({ title, rows, footer }: { title: string; rows: ArchRow[]; footer?: string }) {
   return (
-    <div className="overflow-hidden rounded-xl" style={{ border: '1px solid rgba(255,255,255,0.07)' }}>
+    <div className="overflow-hidden rounded-sm" style={{ border: '1.5px solid rgba(255,255,255,0.09)', background: '#0A0A0A' }}>
       <div
         className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.015)' }}
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
       >
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/25">{title}</span>
-        <span className="font-mono text-[10px] text-white/12">schema.v1</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/22">{title}</span>
+        <span className="font-mono text-[10px] text-white/10">schema.v2</span>
       </div>
-      <div
-        className="grid grid-cols-3 gap-4 px-5 py-2"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
-      >
+      <div className="grid grid-cols-3 gap-4 px-5 py-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
         {['Component', 'Technology', 'Notes'].map((h) => (
-          <span key={h} className="font-mono text-[9px] uppercase tracking-[0.1em] text-white/18">{h}</span>
+          <span key={h} className="font-mono text-[9px] uppercase tracking-[0.1em] text-white/15">{h}</span>
         ))}
       </div>
       {rows.map((row, i) => (
         <div
           key={i}
-          className="grid grid-cols-3 gap-4 px-5 py-2.5 transition-colors hover:bg-white/[0.018]"
-          style={ i < rows.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.035)' } : {} }
+          className="grid grid-cols-3 gap-4 px-5 py-2.5 transition-colors hover:bg-white/[0.015]"
+          style={i < rows.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.04)' } : {}}
         >
-          <span className="font-mono text-[11px] text-white/40">{row.component}</span>
-          <span className="font-mono text-[11px] font-medium text-white/75">{row.technology}</span>
-          <span className="font-mono text-[11px] text-white/28">{row.note}</span>
+          <span className="font-mono text-[11px] text-white/35">{row.component}</span>
+          <span className="font-mono text-[11px] font-semibold text-white/70">{row.technology}</span>
+          <span className="font-mono text-[11px] text-white/25">{row.note}</span>
         </div>
       ))}
       {footer && (
-        <div
-          className="px-5 py-2.5"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.04)', background: 'rgba(255,255,255,0.01)' }}
-        >
+        <div className="px-5 py-2.5" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
           <span className="font-mono text-[10px] text-white/18">{footer}</span>
         </div>
       )}
@@ -182,52 +249,52 @@ function ArchDiagram({ title, rows, footer }: { title: string; rows: ArchRow[]; 
 function HeroSection() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const textY    = useTransform(scrollYProgress, [0, 1], ['0%', '12%']);
-  const portraitY = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
-  const opacity  = useTransform(scrollYProgress, [0, 0.65], [1, 0]);
+  const textY     = useTransform(scrollYProgress, [0, 1], ['0%', '10%']);
+  const portraitY = useTransform(scrollYProgress, [0, 1], ['0%', '22%']);
+  const opacity   = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
 
   return (
-    <section ref={ref} className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden bg-[#050505]">
-      {/* Subtle dot grid — hero only */}
+    <section ref={ref} className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden bg-[#060606]">
+      {/* Dot grid texture */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
+          backgroundImage: 'radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
         }}
       />
-      {/* Bottom fade to solid bg */}
-      <div className="pointer-events-none absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#050505] to-transparent" />
+      {/* Bottom fade */}
+      <div className="pointer-events-none absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#060606] to-transparent" />
 
-      <motion.div
-        style={{ y: textY, opacity }}
-        className="relative mx-auto w-full max-w-7xl px-6 pb-28 pt-36 md:px-12"
-      >
-        <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-[1fr_auto]">
-          {/* Left */}
-          <div>
+      <motion.div style={{ y: textY, opacity }} className="relative w-full max-w-7xl mx-auto px-6 md:px-12 pt-36 pb-24">
+        {/* 12-col grid */}
+        <div className="grid grid-cols-12 gap-x-4 items-center">
+
+          {/* Col 2-9: headline block */}
+          <div className="col-start-1 col-span-12 lg:col-start-2 lg:col-span-8">
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, ease }}
-              className="mb-8 font-mono text-[10px] uppercase tracking-[0.25em] text-white/30"
+              transition={{ duration: 0.5 }}
+              className="mb-7 font-mono text-[10px] uppercase tracking-[0.3em] text-white/25"
             >
               Founder &amp; Software Architect
             </motion.p>
 
             <motion.h1
-              variants={stagger(0.05, 0.08)}
+              variants={stagger(0.05, 0.09)}
               initial="hidden"
               animate="show"
-              className="text-[clamp(3rem,7.5vw,5.5rem)] font-extrabold leading-[0.95] tracking-[-0.04em] text-white"
+              className="leading-[0.93] tracking-[-0.05em] text-white font-black"
+              style={{ fontSize: 'clamp(3.2rem,8vw,6rem)', fontWeight: 900 }}
             >
               {['From architecture', 'to production.'].map((line, i) => (
                 <motion.span
                   key={i}
                   variants={fadeUp}
-                  transition={{ duration: 0.65, ease }}
+                  transition={{ duration: 0.7, ease }}
                   className="block"
-                  style={i === 1 ? { color: 'rgba(255,255,255,0.45)' } : {}}
+                  style={i === 1 ? { color: 'rgba(255,255,255,0.38)' } : {}}
                 >
                   {line}
                 </motion.span>
@@ -237,28 +304,27 @@ function HeroSection() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.55, duration: 0.6, ease }}
-              className="mt-7 max-w-md text-[15px] leading-relaxed text-white/40"
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="mt-6 max-w-sm text-[14px] leading-relaxed text-white/38 lg:ml-[calc(3/9*100%)]"
             >
               I build AI platforms, developer tooling, and infrastructure.
               I own the stack end-to-end — architecture to deployment.
             </motion.p>
 
-            {/* Credential bar */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
-              className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2"
+              transition={{ delay: 0.65, duration: 0.5 }}
+              className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 lg:ml-[calc(3/9*100%)]"
             >
               {[
-                { val: '2',    label: 'production projects' },
-                { val: '100K+', label: 'users at peak scale' },
-                { val: '1',    label: 'LLC entity' },
+                { val: '2',     label: 'production projects' },
+                { val: '100K+', label: 'users at peak' },
+                { val: 'LLC',   label: 'entity founded' },
               ].map((s) => (
                 <div key={s.label} className="flex items-baseline gap-1.5">
-                  <span className="font-mono text-sm font-bold text-white/80">{s.val}</span>
-                  <span className="text-[11px] text-white/30">{s.label}</span>
+                  <span className="font-mono text-sm font-bold text-white/75">{s.val}</span>
+                  <span className="font-mono text-[10px] text-white/28">{s.label}</span>
                 </div>
               ))}
             </motion.div>
@@ -266,24 +332,23 @@ function HeroSection() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.82, duration: 0.5 }}
-              className="mt-9 flex flex-wrap items-center gap-3"
+              transition={{ delay: 0.8, duration: 0.5 }}
+              className="mt-8 flex flex-wrap items-center gap-3 lg:ml-[calc(3/9*100%)]"
             >
               <MagneticButton
                 className={`${SILVER_BTN} group`}
                 onClick={() => document.getElementById('logicstep')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 View Work
-                <ArrowUpRight size={14} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                <ArrowUpRight size={13} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </MagneticButton>
               <MagneticButton
-                className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white/50
-                           transition-all duration-200 hover:text-white/80"
-                style={{ border: '1px solid rgba(255,255,255,0.10)' }}
+                className="inline-flex items-center gap-2 rounded-sm px-5 py-2.5 text-sm font-mono text-white/45 transition-all duration-200 hover:text-white/80"
+                style={{ border: '1px solid rgba(255,255,255,0.09)' }}
                 href={`mailto:${EMAIL}`}
                 as="a"
               >
-                <Mail size={13} />
+                <Mail size={12} />
                 Get in touch
               </MagneticButton>
             </motion.div>
@@ -292,183 +357,209 @@ function HeroSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1, duration: 0.5 }}
-              className="mt-10 flex items-center gap-5"
+              className="mt-9 flex items-center gap-5 lg:ml-[calc(3/9*100%)]"
             >
-              <a href={GITHUB} target="_blank" rel="noopener noreferrer" className="text-white/22 transition-colors hover:text-white/55">
-                <Github size={17} strokeWidth={1.5} />
+              <a href={GITHUB} target="_blank" rel="noopener noreferrer" className="text-white/20 transition-colors hover:text-white/55">
+                <Github size={16} strokeWidth={1.5} />
               </a>
-              <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="text-white/22 transition-colors hover:text-white/55">
-                <Linkedin size={17} strokeWidth={1.5} />
+              <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="text-white/20 transition-colors hover:text-white/55">
+                <Linkedin size={16} strokeWidth={1.5} />
               </a>
-              <a href={`mailto:${EMAIL}`} className="text-white/22 transition-colors hover:text-white/55">
-                <Mail size={17} strokeWidth={1.5} />
+              <a href={`mailto:${EMAIL}`} className="text-white/20 transition-colors hover:text-white/55">
+                <Mail size={16} strokeWidth={1.5} />
               </a>
-              <span className="h-3.5 w-px bg-white/10" />
-              <span className="font-mono text-[10px] text-white/22">Plain City, OH</span>
+              <span className="h-3 w-px bg-white/08" />
+              <span className="font-mono text-[10px] text-white/20">Plain City, OH</span>
             </motion.div>
           </div>
 
-          {/* Right: Portrait — clean, no glow */}
+          {/* Col 11-12: Portrait — breaks out of hero bottom border */}
           <motion.div
             initial={{ opacity: 0, scale: 0.94 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.9, ease }}
+            transition={{ delay: 0.18, duration: 0.9, ease }}
             style={{ y: portraitY }}
-            className="hidden lg:block"
+            className="hidden xl:block col-start-11 col-span-2 relative z-10 mt-8"
           >
-            <div className="relative w-60 xl:w-64">
-              <div
-                className="overflow-hidden rounded-2xl"
-                style={{ border: '1px solid rgba(255,255,255,0.09)' }}
-              >
+            <div className="relative w-52">
+              <div className="overflow-hidden rounded-sm" style={{ border: '1.5px solid rgba(255,255,255,0.10)' }}>
                 <img
                   src={portrait}
                   alt="Arav Bhandari"
                   className="aspect-[3/4] w-full object-cover object-top"
                 />
                 <div
-                  className="absolute inset-x-0 bottom-0 p-4 pt-10"
-                  style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%)' }}
+                  className="absolute inset-x-0 bottom-0 p-4 pt-12"
+                  style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%)' }}
                 >
-                  <p className="text-sm font-bold text-white">Arav Bhandari</p>
-                  <p className="text-[11px] text-white/40">CEO, LogicStep AI LLC</p>
+                  <p className="text-sm font-black text-white" style={{ fontWeight: 900 }}>Arav Bhandari</p>
+                  <p className="font-mono text-[10px] text-white/38">CEO, LogicStep AI LLC</p>
                 </div>
               </div>
             </div>
           </motion.div>
+
         </div>
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
+        transition={{ delay: 1.3 }}
         className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
       >
-        <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/18">Scroll</span>
-        <motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}>
-          <ChevronDown size={13} className="text-white/18" />
+        <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-white/16">Scroll</span>
+        <motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}>
+          <ChevronDown size={12} className="text-white/16" />
         </motion.div>
       </motion.div>
     </section>
   );
 }
 
-// ─── Divider ─────────────────────────────────────────────────────────────────
-function Divider() {
-  return (
-    <div className="mx-auto max-w-7xl px-6 md:px-12">
-      <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)' }} />
-    </div>
-  );
-}
-
 // ─── LogicStepSection ─────────────────────────────────────────────────────────
 function LogicStepSection() {
   const llmRows: ArchRow[] = [
-    { component: 'Frontend',     technology: 'React + TypeScript', note: 'SPA — Vite bundler'        },
-    { component: 'API',          technology: 'Node.js REST',        note: 'Auth + routing layer'      },
-    { component: 'LLM Engine',   technology: 'Self-hosted',         note: 'Ollama / llama.cpp'        },
-    { component: 'Vector Store', technology: 'Embeddings',          note: 'Semantic search — RAG'     },
-    { component: 'Database',     technology: 'MongoDB',             note: 'User state + results'      },
+    { component: 'Frontend',   technology: 'React + Vite',      note: 'TypeScript SPA'           },
+    { component: 'API',        technology: 'Deno 2 + Hono v4',  note: 'REST route handlers'       },
+    { component: 'Database',   technology: 'PostgreSQL',         note: 'postgres.js driver'        },
+    { component: 'AI Grading', technology: 'DeepSeek V3',        note: 'SSE stream + auto-repair'  },
+    { component: 'Monorepo',   technology: 'pnpm workspaces',    note: '@workspace/* packages'     },
   ];
 
   return (
-    <section id="logicstep" className="relative overflow-hidden bg-[#050505] py-28 md:py-36">
-      <div className="mx-auto max-w-7xl px-6 md:px-12">
+    <section id="logicstep" className="relative bg-[#060606] pt-20 pb-28 md:pb-36">
+      <AnimatedDivider index="01" label="ARCHITECTURE" />
+
+      <div className="mx-auto max-w-7xl px-6 md:px-12 pt-16 md:pt-20">
+        {/* 12-col grid */}
+        <div className="grid grid-cols-12 gap-x-4">
+
+          {/* Section index — col 2 */}
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true, margin: '-60px' }}
+            variants={stagger(0, 0.08)}
+            className="col-start-1 col-span-12 lg:col-start-2 lg:col-span-10"
+          >
+            <motion.div variants={fadeUp} transition={{ duration: 0.55, ease }}>
+              <SectionIndex num="01" label="LogicStep AI" />
+            </motion.div>
+
+            {/* Headline — cols 2-7 */}
+            <motion.div variants={fadeUp} transition={{ duration: 0.6, ease }}>
+              <h2
+                className="leading-[1.02] tracking-[-0.04em] text-white font-black"
+                style={{ fontSize: 'clamp(2rem,4.5vw,3.6rem)', fontWeight: 900, maxWidth: '62%' }}
+              >
+                AI skill certification<br />for professionals.
+              </h2>
+            </motion.div>
+
+            {/* Body — offset to col 5 equivalent */}
+            <motion.div
+              variants={fadeUp}
+              transition={{ duration: 0.6, ease }}
+              className="mt-5 lg:ml-[calc(3/10*100%)]"
+            >
+              <p className="max-w-lg text-[14px] leading-relaxed text-white/40">
+                LogicStep evaluates professional competency through real-world, AI-scored challenges.
+                Verifiable results visible to employers. Founded as an LLC and built production-ready.
+              </p>
+
+              {/* Status badge */}
+              <div className="mt-5 inline-flex items-center gap-2.5 rounded-sm px-4 py-2.5"
+                style={{ border: '1.5px solid rgba(255,255,255,0.08)', background: '#0A0A0A' }}>
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                <span className="font-mono text-[11px] text-white/55">Live platform — LLC entity · 2025</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {/* DeepSeek V3 SSE callout — highlighted */}
         <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: '-60px' }}
-          variants={stagger(0, 0.09)}
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: '-40px' }}
+          variants={stagger(0.1, 0.08)}
+          className="mt-8 grid grid-cols-12 gap-x-4"
         >
-          <motion.div variants={fadeUp} transition={{ duration: 0.55, ease }}>
-            <SectionLabel num="01" label="LogicStep AI" />
-            <h2 className="text-[clamp(2rem,4vw,3.4rem)] font-extrabold leading-[1.05] tracking-[-0.04em] text-white">
-              AI skill certification for professionals.
-            </h2>
-            <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-white/40">
-              LogicStep is an AI-powered platform that evaluates professional competency through
-              real-world, scored challenges — verifiable results, visible to employers.
-              Founded as an LLC and built production-ready from the ground up.
-            </p>
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.65, ease }}
+            className="col-start-1 col-span-12 lg:col-start-5 lg:col-span-8"
+          >
+            <div
+              className="rounded-sm p-5 mb-5"
+              style={{ border: '1.5px solid rgba(255,255,255,0.12)', background: '#0A0A0A' }}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/22 mb-2">
+                    AI Grading Engine
+                  </p>
+                  <p className="font-mono text-[13px] font-semibold text-white/75">DeepSeek V3 — SSE Implementation</p>
+                  <p className="mt-2 text-[12px] leading-relaxed text-white/38">
+                    Real-time scoring feedback streamed over Server-Sent Events. Includes auto-repair
+                    logic that retries and re-parses malformed JSON from the model before surfacing
+                    a score — zero dropped evaluations in production.
+                  </p>
+                </div>
+                <span className="shrink-0 font-mono text-[10px] px-2.5 py-1 rounded-sm text-emerald-400/70"
+                  style={{ border: '1px solid rgba(52,211,153,0.2)', background: 'rgba(52,211,153,0.04)' }}>
+                  SSE
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        {/* Images + arch + monorepo grid */}
+        <motion.div
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: '-40px' }}
+          variants={stagger(0.05, 0.09)}
+          className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-12"
+        >
+          {/* Product screenshot — spans 7 cols */}
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.7, ease }}
+            className="overflow-hidden rounded-sm md:col-span-7"
+            style={{ border: '1.5px solid rgba(255,255,255,0.08)' }}
+          >
+            <img src={logicstepProof} alt="LogicStep — challenge and evaluation flow" className="w-full object-cover" loading="lazy" />
           </motion.div>
 
-          {/* Proof screenshot + Architecture side by side */}
-          <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-5">
-            {/* Product screenshot — "Practice into Proof" */}
-            <motion.div
-              variants={fadeUp}
-              transition={{ duration: 0.7, ease }}
-              className="overflow-hidden rounded-xl md:col-span-3"
-              style={{ border: '1px solid rgba(255,255,255,0.07)' }}
-            >
-              <img
-                src={logicstepProof}
-                alt="LogicStep — product walkthrough showing challenge and evaluation flow"
-                className="w-full object-cover"
-                loading="lazy"
-              />
-            </motion.div>
+          {/* Right column — 5 cols */}
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.7, ease }}
+            className="flex flex-col gap-4 md:col-span-5"
+          >
+            <MonorepoBox />
+            <ArchDiagram
+              title="Production Stack"
+              rows={llmRows}
+              footer="Monorepo: @workspace/logicstep + @workspace/api-server"
+            />
+          </motion.div>
 
-            {/* Architecture card */}
-            <motion.div
-              variants={fadeUp}
-              transition={{ duration: 0.7, ease }}
-              className="flex flex-col gap-4 md:col-span-2"
+          {/* Dashboard — full width with browser chrome */}
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.7, ease }}
+            className="overflow-hidden rounded-sm md:col-span-12"
+            style={{ border: '1.5px solid rgba(255,255,255,0.08)' }}
+          >
+            <div
+              className="flex items-center gap-2 px-4 py-2.5"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: '#0A0A0A' }}
             >
-              {/* Status badge */}
-              <div
-                className="flex items-center gap-2.5 rounded-lg px-4 py-3"
-                style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
-              >
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                <span className="text-[11px] font-medium text-white/60">Live platform — LLC entity · 2025</span>
-              </div>
-
-              {/* Stack tags */}
-              <div
-                className="flex-1 rounded-xl p-5"
-                style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
-              >
-                <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.15em] text-white/25">
-                  Technical Architecture
-                </p>
-                <ArchDiagram
-                  title="Self-hosted LLM Stack"
-                  rows={llmRows}
-                  footer="All inference runs on self-managed hardware. No third-party LLM API."
-                />
-              </div>
-            </motion.div>
-
-            {/* Dashboard — full width with browser chrome */}
-            <motion.div
-              variants={fadeUp}
-              transition={{ duration: 0.7, ease }}
-              className="overflow-hidden rounded-xl md:col-span-5"
-              style={{ border: '1px solid rgba(255,255,255,0.07)' }}
-            >
-              <div
-                className="flex items-center gap-2 px-4 py-2.5"
-                style={{
-                  borderBottom: '1px solid rgba(255,255,255,0.07)',
-                  background: 'rgba(255,255,255,0.015)',
-                }}
-              >
-                <span className="h-2 w-2 rounded-full bg-white/15" />
-                <span className="h-2 w-2 rounded-full bg-white/15" />
-                <span className="h-2 w-2 rounded-full bg-white/15" />
-                <span className="ml-3 font-mono text-[10px] text-white/18">logicstep.ai / dashboard</span>
-              </div>
-              <img
-                src={logicstepDashboard}
-                alt="LogicStep AI dashboard — user skill evaluation interface"
-                className="w-full object-cover"
-                loading="lazy"
-              />
-            </motion.div>
-          </div>
+              <span className="h-2 w-2 rounded-full bg-white/12" />
+              <span className="h-2 w-2 rounded-full bg-white/12" />
+              <span className="h-2 w-2 rounded-full bg-white/12" />
+              <span className="ml-3 font-mono text-[10px] text-white/18">logicstep.ai / dashboard</span>
+            </div>
+            <img src={logicstepDashboard} alt="LogicStep AI dashboard" className="w-full object-cover" loading="lazy" />
+          </motion.div>
         </motion.div>
       </div>
     </section>
@@ -483,10 +574,10 @@ function CountUp({ target, suffix = '' }: { target: number; suffix?: string }) {
   useEffect(() => {
     if (!inView) return;
     const start = performance.now();
-    const dur = 1800;
+    const dur = 2000;
     const tick = (now: number) => {
       const t = Math.min((now - start) / dur, 1);
-      /* ease-out cubic */ const e = 1 - Math.pow(1 - t, 3);
+      const e = 1 - Math.pow(1 - t, 3);
       setCount(Math.floor(e * target));
       if (t < 1) requestAnimationFrame(tick);
     };
@@ -498,96 +589,101 @@ function CountUp({ target, suffix = '' }: { target: number; suffix?: string }) {
 // ─── HydraSection ─────────────────────────────────────────────────────────────
 function HydraSection() {
   const hydraRows: ArchRow[] = [
-    { component: 'Bot Framework', technology: 'discord.py',       note: 'Python 3 — event loop'   },
-    { component: 'Gateway',       technology: 'Discord API',       note: 'WebSocket + REST'        },
-    { component: 'Storage v1',    technology: 'Custom JSON DB',    note: 'File-system KV store'    },
-    { component: 'Storage v2',    technology: 'MongoDB',           note: 'Persistent documents'    },
-    { component: 'Language',      technology: 'Python 3',          note: 'All services'            },
+    { component: 'Bot Framework', technology: 'discord.py',        note: 'Python 3 event loop'        },
+    { component: 'Gateway',       technology: 'Discord API',        note: 'WebSocket + REST'           },
+    { component: 'Storage v0',    technology: 'Custom JSON Engine', note: 'Hand-rolled — first 10k'    },
+    { component: 'Storage v1',    technology: 'PostgreSQL',         note: 'Migration at scale'         },
+    { component: 'Language',      technology: 'Python 3',           note: 'All services'               },
   ];
 
   return (
-    <section id="hydra" className="relative overflow-hidden bg-[#050505] py-28 md:py-36">
-      <Divider />
-      <div className="mx-auto max-w-7xl px-6 pt-28 md:px-12 md:pt-36">
-        <div className="grid grid-cols-1 items-start gap-16 lg:grid-cols-2">
+    <section id="hydra" className="relative bg-[#060606] pt-20 pb-28 md:pb-36">
+      <AnimatedDivider index="02" label="IMPACT" />
+
+      <div className="mx-auto max-w-7xl px-6 md:px-12 pt-16 md:pt-20">
+        <div className="grid grid-cols-1 items-start gap-14 lg:grid-cols-2">
+
           {/* Left */}
           <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-60px' }}
+            initial="hidden" whileInView="show" viewport={{ once: true, margin: '-60px' }}
             variants={stagger(0, 0.09)}
           >
             <motion.div variants={fadeUp} transition={{ duration: 0.55, ease }}>
-              <SectionLabel num="02" label="Hydra Bot" />
+              <SectionIndex num="02" label="Hydra Bot" />
             </motion.div>
 
-            {/* Industrial counter */}
-            <motion.div variants={fadeUp} transition={{ duration: 0.65, ease }}>
+            {/* Giant counter */}
+            <motion.div variants={fadeUp} transition={{ duration: 0.7, ease }}>
               <div
                 className="font-mono font-black leading-none text-white tabular-nums"
-                style={{ fontSize: 'clamp(5rem,13vw,8rem)', letterSpacing: '-0.04em' }}
+                style={{ fontSize: 'clamp(5rem,14vw,8.5rem)', letterSpacing: '-0.04em', fontWeight: 900 }}
               >
                 <CountUp target={100000} suffix="+" />
               </div>
-              <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-white/30">
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/28">
                 Peak Active Users
               </p>
             </motion.div>
 
             <motion.div variants={fadeUp} transition={{ duration: 0.6, ease }} className="mt-8">
-              <h2 className="text-[clamp(1.8rem,3vw,2.6rem)] font-extrabold leading-tight tracking-[-0.04em] text-white">
+              <h2
+                className="leading-tight tracking-[-0.04em] text-white font-black"
+                style={{ fontSize: 'clamp(1.8rem,3.2vw,2.8rem)', fontWeight: 900 }}
+              >
                 Discord esports bot.<br />Built to scale.
               </h2>
-              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-white/40">
+              <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-white/38">
                 Built end-to-end with Python and discord.py — covering application management,
                 support ticketing, moderation, and community tooling across tens of thousands
                 of concurrent Discord users.
               </p>
             </motion.div>
 
-            {/* DB Story */}
+            {/* Engineering Primitive callout — the JSON DB story */}
             <motion.div
               variants={fadeUp}
               transition={{ duration: 0.6, ease }}
-              className="mt-6 rounded-xl p-5"
-              style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
+              className="mt-6 rounded-sm p-5"
+              style={{ border: '1.5px solid rgba(255,255,255,0.10)', background: '#0A0A0A' }}
             >
-              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.15em] text-white/25">
-                Architectural Decision · Storage
+              <div className="flex items-center gap-2 mb-3">
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/20">Engineering Primitive</span>
+                <span className="font-mono text-[9px] px-2 py-0.5 rounded-sm text-white/30"
+                  style={{ border: '1px solid rgba(255,255,255,0.08)' }}>v0 · first 10k users</span>
+              </div>
+              <p className="font-mono text-[12px] font-semibold text-white/65 mb-2">
+                Custom JSON Storage Engine
               </p>
-              <p className="text-[13px] leading-relaxed text-white/55">
-                Initial scaling used a custom JSON-based database — a deliberate exercise in
-                file-system management and key-value store design before introducing a
-                full document database. As user load grew, storage migrated to MongoDB for
-                persistent document handling and query performance.
+              <p className="text-[12px] leading-relaxed text-white/42">
+                Before introducing a real database, I hand-rolled a file-system key-value store in
+                Python — flat JSON files with custom indexing, locking, and query logic.
+                A deliberate choice to understand storage primitives from first principles.
+                Scaled to the first 10k users before migrating to PostgreSQL.
               </p>
             </motion.div>
 
-            {/* Sunset story */}
+            {/* Postgres migration */}
             <motion.div
               variants={fadeUp}
               transition={{ duration: 0.6, ease }}
-              className="mt-3 rounded-xl p-5"
-              style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
+              className="mt-3 rounded-sm p-5"
+              style={{ border: '1.5px solid rgba(255,255,255,0.07)', background: '#0A0A0A' }}
             >
-              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.15em] text-white/25">
-                Status · Sunsetted
-              </p>
-              <p className="text-[13px] leading-relaxed text-white/55">
-                The project was sunsetted after scaling bottlenecks surfaced at peak load.
-                The infrastructure patterns and architectural decisions made during Hydra's
-                development directly informed the production-grade systems now running
-                LogicStep AI LLC.
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/20 mb-2">Migration · PostgreSQL</p>
+              <p className="text-[12px] leading-relaxed text-white/42">
+                When user load outgrew the JSON engine, I migrated to PostgreSQL — retaining all
+                historical data. The architectural patterns from Hydra's storage migrations
+                directly informed LogicStep's production database design.
               </p>
             </motion.div>
 
             {/* Stack tags */}
-            <motion.div variants={fadeIn} transition={{ duration: 0.5 }} className="mt-5 flex flex-wrap gap-2">
-              {['discord.py', 'Python 3', 'MongoDB', 'Custom JSON DB', 'Discord API'].map((t) => (
+            <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="mt-5 flex flex-wrap gap-2">
+              {['discord.py', 'Python 3', 'PostgreSQL', 'Custom JSON Engine', 'Discord API'].map((t) => (
                 <span
                   key={t}
-                  className="rounded-md px-3 py-1 font-mono text-[11px] text-white/35"
-                  style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+                  className="rounded-sm px-3 py-1 font-mono text-[11px] text-white/32"
+                  style={{ border: '1px solid rgba(255,255,255,0.08)', background: '#0A0A0A' }}
                 >
                   {t}
                 </span>
@@ -595,11 +691,9 @@ function HydraSection() {
             </motion.div>
           </motion.div>
 
-          {/* Right: Arch diagram + phone screenshots */}
+          {/* Right: arch diagram + phone screenshots */}
           <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-60px' }}
+            initial="hidden" whileInView="show" viewport={{ once: true, margin: '-60px' }}
             variants={stagger(0.1, 0.1)}
             className="flex flex-col gap-6"
           >
@@ -607,40 +701,23 @@ function HydraSection() {
               <ArchDiagram
                 title="Hydra Bot Architecture"
                 rows={hydraRows}
-                footer="v1 JSON store was hand-rolled — deliberate decision to understand primitives before adding a DB layer."
+                footer="v0 JSON engine hand-rolled — understand primitives first, add infrastructure second."
               />
             </motion.div>
 
-            {/* Phone screenshots — clean, no decorative glow */}
             <motion.div
               variants={fadeUp}
               transition={{ duration: 0.8, ease }}
-              className="flex items-start justify-center gap-0"
+              className="flex items-start justify-center"
             >
-              <div className="relative z-10 w-[190px]">
-                <div
-                  className="overflow-hidden rounded-[28px]"
-                  style={{ border: '1px solid rgba(255,255,255,0.12)' }}
-                >
-                  <img
-                    src={hydraApplications}
-                    alt="Hydra Bot — Application system channel"
-                    className="w-full"
-                    loading="lazy"
-                  />
+              <div className="relative z-10 w-[185px]">
+                <div className="overflow-hidden rounded-[26px]" style={{ border: '1.5px solid rgba(255,255,255,0.12)' }}>
+                  <img src={hydraApplications} alt="Hydra Bot — Application system" className="w-full" loading="lazy" />
                 </div>
               </div>
-              <div className="relative z-0 -ml-8 mt-12 w-[190px] opacity-80">
-                <div
-                  className="overflow-hidden rounded-[28px]"
-                  style={{ border: '1px solid rgba(255,255,255,0.09)' }}
-                >
-                  <img
-                    src={hydraTickets}
-                    alt="Hydra Bot — Support ticket channel"
-                    className="w-full"
-                    loading="lazy"
-                  />
+              <div className="relative z-0 -ml-8 mt-10 w-[185px] opacity-75">
+                <div className="overflow-hidden rounded-[26px]" style={{ border: '1.5px solid rgba(255,255,255,0.08)' }}>
+                  <img src={hydraTickets} alt="Hydra Bot — Support tickets" className="w-full" loading="lazy" />
                 </div>
               </div>
             </motion.div>
@@ -656,79 +733,97 @@ function FounderJournalSection() {
   const stats = [
     { val: '100K+', label: 'Users at peak' },
     { val: 'LLC',   label: 'Entity founded' },
-    { val: '1st',   label: 'Hackathon — Upper Arlington' },
+    { val: '1st',   label: 'UA Hackathon'  },
     { val: '2',     label: 'Production projects' },
   ];
 
   return (
-    <section id="journal" className="relative overflow-hidden bg-[#050505] py-28 md:py-36">
-      <Divider />
-      <div className="mx-auto max-w-7xl px-6 pt-28 md:px-12 md:pt-36">
+    <section id="journal" className="relative bg-[#060606] pt-20 pb-28 md:pb-36">
+      <AnimatedDivider index="03" label="FIELD NOTES" />
+
+      <div className="mx-auto max-w-7xl px-6 md:px-12">
+        {/* Founder photo breaks out of the divider — negative top margin */}
         <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: '-60px' }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.9, ease }}
+          className="relative -mt-0 pt-0 z-10"
+          style={{ marginTop: '-2rem' }}
+        >
+          {/* The image deliberately overlaps the section border above */}
+          <div className="relative overflow-visible">
+            <div
+              className="overflow-hidden rounded-sm relative"
+              style={{ border: '1.5px solid rgba(255,255,255,0.09)' }}
+            >
+              <img
+                src={founderTeam}
+                alt="Arav Bhandari at the Upper Arlington Hackathon — William & Carol Mohr STEM Lab, Ohio"
+                className="h-[340px] w-full object-cover object-center md:h-[480px]"
+                loading="lazy"
+              />
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{ background: 'linear-gradient(to top, rgba(6,6,6,0.78) 0%, transparent 55%)' }}
+              />
+              <div className="absolute bottom-6 left-6 right-6 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="font-black text-white md:text-xl" style={{ fontWeight: 900, fontSize: 'clamp(1rem,2vw,1.2rem)' }}>
+                    Upper Arlington Hackathon
+                  </p>
+                  <p className="mt-1 font-mono text-[10px] text-white/35">
+                    William &amp; Carol Mohr Family STEM Lab · Ohio
+                  </p>
+                </div>
+                <div
+                  className="flex items-center gap-2 rounded-sm px-3 py-1.5"
+                  style={{
+                    border: '1px solid rgba(255,255,255,0.14)',
+                    background: 'rgba(6,6,6,0.65)',
+                    backdropFilter: 'blur(12px)',
+                  }}
+                >
+                  <span className="font-mono text-xs font-bold text-white">1st Place</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: '-40px' }}
           variants={stagger(0, 0.09)}
+          className="mt-10"
         >
           <motion.div variants={fadeUp} transition={{ duration: 0.55, ease }}>
-            <SectionLabel num="03" label="Field Notes" />
-            <h2 className="text-[clamp(2rem,4vw,3.4rem)] font-extrabold leading-[1.05] tracking-[-0.04em] text-white">
+            <SectionIndex num="03" label="Field Notes" />
+            <h2
+              className="tracking-[-0.04em] text-white font-black"
+              style={{ fontSize: 'clamp(2rem,4.5vw,3.4rem)', fontWeight: 900, lineHeight: 1.05 }}
+            >
               In the room.
-              <span className="text-white/35"> Not behind the screen.</span>
+              <span style={{ color: 'rgba(255,255,255,0.3)' }}> Not behind the screen.</span>
             </h2>
-            <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-white/40">
+            <p className="mt-4 max-w-lg text-[14px] leading-relaxed text-white/38">
               Products get built at the keyboard — but they get validated in the room.
               At hackathons, demos, and in front of people who don't care about the code.
             </p>
           </motion.div>
 
-          {/* Full-bleed photo */}
-          <motion.div
-            variants={fadeUp}
-            transition={{ duration: 0.85, ease }}
-            className="relative mt-10 overflow-hidden rounded-xl"
-            style={{ border: '1px solid rgba(255,255,255,0.07)' }}
-          >
-            <img
-              src={founderTeam}
-              alt="Arav Bhandari with team at the Upper Arlington Hackathon — William & Carol Mohr STEM Lab, Ohio"
-              className="h-[360px] w-full object-cover object-center md:h-[500px]"
-              loading="lazy"
-            />
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={{ background: 'linear-gradient(to top, rgba(5,5,5,0.72) 0%, transparent 60%)' }}
-            />
-            <div className="absolute bottom-6 left-6 right-6 flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="text-lg font-bold text-white md:text-xl">Upper Arlington Hackathon</p>
-                <p className="mt-0.5 font-mono text-[11px] text-white/40">
-                  William &amp; Carol Mohr Family STEM Lab · Ohio
-                </p>
-              </div>
-              <div
-                className="flex items-center gap-2 rounded-full px-3 py-1.5"
-                style={{ border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)' }}
-              >
-                <span className="font-mono text-xs font-bold text-white">1st Place</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Stats */}
           <motion.div
             variants={fadeUp}
             transition={{ duration: 0.6, ease }}
-            className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"
+            className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4"
           >
             {stats.map((s) => (
               <div
                 key={s.label}
-                className="rounded-xl p-5"
-                style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
+                className="rounded-sm p-5"
+                style={{ border: '1.5px solid rgba(255,255,255,0.08)', background: '#0A0A0A' }}
               >
-                <p className="font-mono text-xl font-black tracking-tight text-white">{s.val}</p>
-                <p className="mt-1 font-mono text-[10px] text-white/30">{s.label}</p>
+                <p className="font-mono text-xl font-black tracking-tight text-white" style={{ fontWeight: 900 }}>{s.val}</p>
+                <p className="mt-1 font-mono text-[10px] text-white/28">{s.label}</p>
               </div>
             ))}
           </motion.div>
@@ -744,54 +839,63 @@ function ServicesSection() {
     {
       num: '01',
       title: 'Web Design & Development',
-      desc: 'Production-grade web products — from zero-to-one MVPs to full consumer applications. Built with React, TypeScript, and modern tooling. Delivered on time.',
-      tags: ['React', 'TypeScript', 'Tailwind CSS', 'Vite', 'Node.js'],
+      desc: 'Production-grade web products — zero-to-one MVPs to full consumer applications. React, TypeScript, and modern tooling. Delivered on time.',
+      tags: ['React', 'TypeScript', 'Tailwind CSS', 'Vite', 'Deno 2'],
     },
     {
       num: '02',
       title: 'AI Automation & Integration',
-      desc: 'Self-hosted LLM deployment, intelligent workflow automation, and AI feature integration. Private infrastructure, no API vendor lock-in.',
-      tags: ['Self-hosted LLMs', 'Python', 'Ollama', 'MongoDB', 'RAG pipelines'],
+      desc: 'Self-hosted LLM deployment, intelligent workflow automation, and AI feature integration. Real-time SSE grading, private infrastructure, no vendor lock-in.',
+      tags: ['DeepSeek V3', 'SSE Streaming', 'Python', 'PostgreSQL', 'Hono v4'],
     },
   ];
 
   return (
-    <section id="services" className="relative bg-[#050505] py-28 md:py-36">
-      <Divider />
-      <div className="mx-auto max-w-7xl px-6 pt-28 md:px-12 md:pt-36">
+    <section id="services" className="relative bg-[#060606] pt-20 pb-28 md:pb-36">
+      <AnimatedDivider index="04" label="SERVICES" />
+
+      <div className="mx-auto max-w-7xl px-6 md:px-12 pt-16 md:pt-20">
         <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: '-60px' }}
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: '-60px' }}
           variants={stagger(0, 0.09)}
         >
           <motion.div variants={fadeUp} transition={{ duration: 0.55, ease }}>
-            <SectionLabel num="04" label="Services" />
-            <h2 className="text-[clamp(2rem,4vw,3.4rem)] font-extrabold leading-[1.05] tracking-[-0.04em] text-white">
+            <SectionIndex num="04" label="Services" />
+            <h2
+              className="tracking-[-0.04em] text-white font-black"
+              style={{ fontSize: 'clamp(2rem,4.5vw,3.4rem)', fontWeight: 900, lineHeight: 1.05 }}
+            >
               What I build.
             </h2>
           </motion.div>
 
-          <div className="mt-11 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {services.map((s) => (
+          <div className="mt-10 grid grid-cols-1 gap-0 md:grid-cols-2">
+            {services.map((s, i) => (
               <motion.div
                 key={s.num}
                 variants={fadeUp}
                 transition={{ duration: 0.65, ease }}
-                className="group rounded-xl p-7 transition-colors duration-300 hover:bg-white/[0.025] md:p-9"
-                style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+                className="group p-8 transition-colors duration-300 hover:bg-white/[0.018] md:p-10"
+                style={{
+                  border: '1.5px solid rgba(255,255,255,0.08)',
+                  background: '#0A0A0A',
+                  borderLeft: i === 1 ? 'none' : undefined,
+                }}
               >
-                <p className="font-mono text-[10px] text-white/20">{s.num}</p>
-                <h3 className="mt-5 text-xl font-bold leading-tight tracking-[-0.03em] text-white md:text-2xl">
+                <p className="font-mono text-[10px] text-white/18 tabular-nums">{s.num}</p>
+                <h3
+                  className="mt-5 leading-tight tracking-[-0.03em] text-white font-black"
+                  style={{ fontSize: 'clamp(1.2rem,2vw,1.5rem)', fontWeight: 900 }}
+                >
                   {s.title}
                 </h3>
-                <p className="mt-3 text-[14px] leading-relaxed text-white/45">{s.desc}</p>
+                <p className="mt-3 text-[13px] leading-relaxed text-white/42">{s.desc}</p>
                 <div className="mt-7 flex flex-wrap gap-2">
                   {s.tags.map((t) => (
                     <span
                       key={t}
-                      className="rounded font-mono text-[10px] px-2.5 py-1 text-white/30"
-                      style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+                      className="rounded-sm font-mono text-[10px] px-2.5 py-1 text-white/28"
+                      style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.015)' }}
                     >
                       {t}
                     </span>
@@ -804,9 +908,9 @@ function ServicesSection() {
           <motion.div
             variants={fadeUp}
             transition={{ duration: 0.65, ease }}
-            className="mt-14 flex flex-col items-center gap-5 text-center"
+            className="mt-12 flex flex-col items-center gap-5 text-center"
           >
-            <p className="max-w-xs text-[14px] text-white/30">
+            <p className="max-w-xs font-mono text-[12px] text-white/28">
               I work with founders and teams who need software that actually ships.
             </p>
             <MagneticButton
@@ -815,7 +919,7 @@ function ServicesSection() {
               as="a"
             >
               Start a project
-              <ArrowUpRight size={14} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              <ArrowUpRight size={13} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </MagneticButton>
           </motion.div>
         </motion.div>
@@ -827,34 +931,34 @@ function ServicesSection() {
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
   return (
-    <footer className="bg-[#050505]" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+    <footer className="bg-[#060606]" style={{ borderTop: '1.5px solid rgba(255,255,255,0.07)' }}>
       <div className="mx-auto max-w-7xl px-6 py-10 md:px-12">
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <div>
-            <p className="text-sm font-bold text-white">Arav Bhandari</p>
-            <p className="mt-0.5 font-mono text-[10px] text-white/22">
+            <p className="font-black text-white" style={{ fontWeight: 900 }}>Arav Bhandari</p>
+            <p className="mt-0.5 font-mono text-[10px] text-white/20">
               Founder &amp; Software Architect · LogicStep AI LLC
             </p>
           </div>
           <div className="flex items-center gap-6">
             {[
-              { label: 'GitHub',   href: GITHUB,              Icon: Github   },
-              { label: 'LinkedIn', href: LINKEDIN,            Icon: Linkedin },
-              { label: 'Email',    href: `mailto:${EMAIL}`,   Icon: Mail     },
+              { label: 'GitHub',   href: GITHUB,            Icon: Github   },
+              { label: 'LinkedIn', href: LINKEDIN,           Icon: Linkedin },
+              { label: 'Email',    href: `mailto:${EMAIL}`,  Icon: Mail     },
             ].map(({ label, href, Icon }) => (
               <a
                 key={label}
                 href={href}
                 target={href.startsWith('http') ? '_blank' : undefined}
                 rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className="flex items-center gap-1.5 font-mono text-[11px] text-white/22 transition-colors hover:text-white/55"
+                className="flex items-center gap-1.5 font-mono text-[11px] text-white/20 transition-colors hover:text-white/55"
               >
                 <Icon size={12} strokeWidth={1.5} />
                 {label}
               </a>
             ))}
           </div>
-          <p className="font-mono text-[10px] text-white/18">© 2026 Arav Bhandari</p>
+          <p className="font-mono text-[10px] text-white/15">© 2026 Arav Bhandari</p>
         </div>
       </div>
     </footer>
@@ -864,7 +968,8 @@ function Footer() {
 // ─── Portfolio ────────────────────────────────────────────────────────────────
 export function Portfolio() {
   return (
-    <div className="bg-[#050505]">
+    <div className="bg-[#060606]">
+      <ScrollProgress />
       <FloatingNav />
       <HeroSection />
       <LogicStepSection />
