@@ -6,12 +6,12 @@ import {
   useInView,
   AnimatePresence,
   useMotionValue,
+  useMotionTemplate,
   useSpring,
 } from 'framer-motion';
 import { Github, Linkedin, Mail, ArrowUpRight, ChevronDown } from 'lucide-react';
 
 // ─── Assets ──────────────────────────────────────────────────────────────────
-import portrait from '@assets/IMG_6864_1777758948574.JPEG';
 import logicstepProof from '@assets/logicstep-proof.png';
 import logicstepDashboard from '@assets/logicstep-dashboard.png';
 import hydraApplications from '@assets/hydra-applications.jpg';
@@ -32,11 +32,11 @@ const stagger = (delay = 0, staggerChildren = 0.07) => ({
   show: { transition: { delayChildren: delay, staggerChildren } },
 });
 
-// ─── Silver CTA button ────────────────────────────────────────────────────────
-const SILVER_BTN =
-  'inline-flex items-center gap-2 rounded-sm px-5 py-2.5 text-sm font-semibold text-slate-900 ' +
-  'bg-gradient-to-r from-slate-100 via-slate-200 to-slate-300 ' +
-  'hover:from-white hover:to-slate-200 transition-all duration-200';
+// ─── Gold CTA button ──────────────────────────────────────────────────────────
+const GOLD_BTN =
+  'inline-flex items-center gap-2 rounded-sm px-5 py-2.5 text-sm font-semibold text-[#000000] ' +
+  'bg-[#F59E0B] hover:bg-[#D97706] transition-colors duration-150 ' +
+  'shadow-[2px_2px_0px_0px_#000000]';
 
 // ─── ScrollProgress ───────────────────────────────────────────────────────────
 function ScrollProgress() {
@@ -89,6 +89,33 @@ function MagneticButton({ children, className = '', as: _tag = 'button', href, o
   return <motion.button onClick={onClick} {...(rest as any)} {...shared}>{children}</motion.button>;
 }
 
+// ─── TiltCard ─────────────────────────────────────────────────────────────────
+function TiltCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const rotX = useMotionValue(0);
+  const rotY = useMotionValue(0);
+  const springRotX = useSpring(rotX, { stiffness: 200, damping: 25 });
+  const springRotY = useSpring(rotY, { stiffness: 200, damping: 25 });
+
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const r = ref.current!.getBoundingClientRect();
+    rotX.set(((e.clientY - r.top) / r.height - 0.5) * -10);
+    rotY.set(((e.clientX - r.left) / r.width - 0.5) * 10);
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={onMove}
+      onMouseLeave={() => { rotX.set(0); rotY.set(0); }}
+      style={{ rotateX: springRotX, rotateY: springRotY, transformStyle: 'preserve-3d' }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 // ─── FloatingNav ─────────────────────────────────────────────────────────────
 function FloatingNav() {
   const [visible, setVisible] = useState(false);
@@ -133,7 +160,7 @@ function FloatingNav() {
             </a>
           ))}
           <span className="h-3.5 w-px bg-white/08 mx-0.5" />
-          <MagneticButton className={`${SILVER_BTN} !px-3.5 !py-1.5 !text-[11px] !rounded-sm`} href={`mailto:${EMAIL}`} as="a">
+          <MagneticButton className={`${GOLD_BTN} !px-3.5 !py-1.5 !text-[11px] !rounded-sm`} href={`mailto:${EMAIL}`} as="a">
             Hire Me
           </MagneticButton>
         </motion.nav>
@@ -160,7 +187,7 @@ function AnimatedDivider({ index, label }: { index: string; label: string }) {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.9, duration: 0.5 }}
-          className="shrink-0 font-mono text-[10px] uppercase tracking-[0.22em] text-white/15"
+          className="shrink-0 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/30"
         >
           {index} // {label}
         </motion.span>
@@ -249,12 +276,24 @@ function ArchDiagram({ title, rows, footer }: { title: string; rows: ArchRow[]; 
 function HeroSection() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const textY     = useTransform(scrollYProgress, [0, 1], ['0%', '10%']);
-  const portraitY = useTransform(scrollYProgress, [0, 1], ['0%', '22%']);
-  const opacity   = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  const textY   = useTransform(scrollYProgress, [0, 1], ['0%', '10%']);
+  const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 80, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 80, damping: 20 });
+  const spotlightBg = useMotionTemplate`radial-gradient(300px circle at ${springX}px ${springY}px, rgba(245,158,11,0.03) 0%, transparent 70%)`;
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return;
+    mouseX.set(e.clientX - rect.left);
+    mouseY.set(e.clientY - rect.top);
+  };
 
   return (
-    <section ref={ref} className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden bg-[#060606]">
+    <section ref={ref} onMouseMove={handleMouseMove} className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden bg-[#060606]">
       {/* Dot grid texture */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -263,6 +302,8 @@ function HeroSection() {
           backgroundSize: '32px 32px',
         }}
       />
+      {/* Mouse spotlight — ultra-faint amber, tight radius */}
+      <motion.div className="pointer-events-none absolute inset-0" style={{ background: spotlightBg }} />
       {/* Bottom fade */}
       <div className="pointer-events-none absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#060606] to-transparent" />
 
@@ -282,30 +323,29 @@ function HeroSection() {
             </motion.p>
 
             <motion.h1
-              variants={stagger(0.05, 0.09)}
-              initial="hidden"
-              animate="show"
-              className="leading-[0.93] tracking-[-0.05em] text-white font-black"
-              style={{ fontSize: 'clamp(3.2rem,8vw,6rem)', fontWeight: 900 }}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="leading-[0.9] tracking-[-0.055em] text-white font-black"
+              style={{ fontSize: 'clamp(3.8rem,10vw,8rem)', fontWeight: 900 }}
             >
-              {['From architecture', 'to production.'].map((line, i) => (
-                <motion.span
-                  key={i}
-                  variants={fadeUp}
-                  transition={{ duration: 0.7, ease }}
-                  className="block"
-                  style={i === 1 ? { color: 'rgba(255,255,255,0.38)' } : {}}
-                >
-                  {line}
-                </motion.span>
-              ))}
+              ARAV BHANDARI
             </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-3 font-mono text-[11px] tracking-[0.12em] text-amber-400/60 uppercase"
+            >
+              CEO &amp; Co-Founder, LogicStep AI
+            </motion.p>
 
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.6 }}
-              className="mt-6 max-w-sm text-[14px] leading-relaxed text-white/38 lg:ml-[calc(3/9*100%)]"
+              className="mt-6 max-w-sm text-[15px] leading-relaxed text-white/72 lg:ml-[calc(3/9*100%)]"
             >
               I build AI platforms, developer tooling, and infrastructure.
               I own the stack end-to-end — architecture to deployment.
@@ -336,7 +376,7 @@ function HeroSection() {
               className="mt-8 flex flex-wrap items-center gap-3 lg:ml-[calc(3/9*100%)]"
             >
               <MagneticButton
-                className={`${SILVER_BTN} group`}
+                className={`${GOLD_BTN} group`}
                 onClick={() => document.getElementById('logicstep')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 View Work
@@ -373,31 +413,6 @@ function HeroSection() {
             </motion.div>
           </div>
 
-          {/* Col 11-12: Portrait — breaks out of hero bottom border */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.18, duration: 0.9, ease }}
-            style={{ y: portraitY }}
-            className="hidden xl:block col-start-11 col-span-2 relative z-10 mt-8"
-          >
-            <div className="relative w-52">
-              <div className="overflow-hidden rounded-sm" style={{ border: '1.5px solid rgba(255,255,255,0.10)' }}>
-                <img
-                  src={portrait}
-                  alt="Arav Bhandari"
-                  className="aspect-[3/4] w-full object-cover object-top"
-                />
-                <div
-                  className="absolute inset-x-0 bottom-0 p-4 pt-12"
-                  style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%)' }}
-                >
-                  <p className="text-sm font-black text-white" style={{ fontWeight: 900 }}>Arav Bhandari</p>
-                  <p className="font-mono text-[10px] text-white/38">CEO, LogicStep AI LLC</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
 
         </div>
       </motion.div>
@@ -461,7 +476,7 @@ function LogicStepSection() {
               transition={{ duration: 0.6, ease }}
               className="mt-5 lg:ml-[calc(3/10*100%)]"
             >
-              <p className="max-w-lg text-[14px] leading-relaxed text-white/40">
+              <p className="max-w-lg text-[15px] leading-relaxed text-white/40">
                 LogicStep evaluates professional competency through real-world, AI-scored challenges.
                 Verifiable results visible to employers. Founded as an LLC and built production-ready.
               </p>
@@ -497,7 +512,7 @@ function LogicStepSection() {
                     AI Grading Engine
                   </p>
                   <p className="font-mono text-[13px] font-semibold text-white/75">DeepSeek V3 — SSE Implementation</p>
-                  <p className="mt-2 text-[12px] leading-relaxed text-white/38">
+                  <p className="mt-2 text-[15px] leading-relaxed text-white/72">
                     Real-time scoring feedback streamed over Server-Sent Events. Includes auto-repair
                     logic that retries and re-parses malformed JSON from the model before surfacing
                     a score — zero dropped evaluations in production.
@@ -632,7 +647,7 @@ function HydraSection() {
               >
                 Discord esports bot.<br />Built to scale.
               </h2>
-              <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-white/38">
+              <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-white/72">
                 Built end-to-end with Python and discord.py — covering application management,
                 support ticketing, moderation, and community tooling across tens of thousands
                 of concurrent Discord users.
@@ -654,7 +669,7 @@ function HydraSection() {
               <p className="font-mono text-[12px] font-semibold text-white/65 mb-2">
                 Custom JSON Storage Engine
               </p>
-              <p className="text-[12px] leading-relaxed text-white/42">
+              <p className="text-[15px] leading-relaxed text-white/72">
                 Before introducing a real database, I hand-rolled a file-system key-value store in
                 Python — flat JSON files with custom indexing, locking, and query logic.
                 A deliberate choice to understand storage primitives from first principles.
@@ -670,7 +685,7 @@ function HydraSection() {
               style={{ border: '1.5px solid rgba(255,255,255,0.07)', background: '#0A0A0A' }}
             >
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/20 mb-2">Migration · PostgreSQL</p>
-              <p className="text-[12px] leading-relaxed text-white/42">
+              <p className="text-[15px] leading-relaxed text-white/72">
                 When user load outgrew the JSON engine, I migrated to PostgreSQL — retaining all
                 historical data. The architectural patterns from Hydra's storage migrations
                 directly informed LogicStep's production database design.
@@ -805,7 +820,7 @@ function FounderJournalSection() {
               In the room.
               <span style={{ color: 'rgba(255,255,255,0.3)' }}> Not behind the screen.</span>
             </h2>
-            <p className="mt-4 max-w-lg text-[14px] leading-relaxed text-white/38">
+            <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-white/72">
               Products get built at the keyboard — but they get validated in the room.
               At hackathons, demos, and in front of people who don't care about the code.
             </p>
@@ -852,7 +867,7 @@ function ServicesSection() {
 
   return (
     <section id="services" className="relative bg-[#060606] pt-20 pb-28 md:pb-36">
-      <AnimatedDivider index="04" label="SERVICES" />
+      <AnimatedDivider index="05" label="SERVICES" />
 
       <div className="mx-auto max-w-7xl px-6 md:px-12 pt-16 md:pt-20">
         <motion.div
@@ -860,7 +875,7 @@ function ServicesSection() {
           variants={stagger(0, 0.09)}
         >
           <motion.div variants={fadeUp} transition={{ duration: 0.55, ease }}>
-            <SectionIndex num="04" label="Services" />
+            <SectionIndex num="05" label="Services" />
             <h2
               className="tracking-[-0.04em] text-white font-black"
               style={{ fontSize: 'clamp(2rem,4.5vw,3.4rem)', fontWeight: 900, lineHeight: 1.05 }}
@@ -889,7 +904,7 @@ function ServicesSection() {
                 >
                   {s.title}
                 </h3>
-                <p className="mt-3 text-[13px] leading-relaxed text-white/42">{s.desc}</p>
+                <p className="mt-3 text-[15px] leading-relaxed text-white/72">{s.desc}</p>
                 <div className="mt-7 flex flex-wrap gap-2">
                   {s.tags.map((t) => (
                     <span
@@ -914,7 +929,7 @@ function ServicesSection() {
               I work with founders and teams who need software that actually ships.
             </p>
             <MagneticButton
-              className={`${SILVER_BTN} group`}
+              className={`${GOLD_BTN} group`}
               href={`mailto:${EMAIL}?subject=Project%20Inquiry`}
               as="a"
             >
@@ -965,6 +980,184 @@ function Footer() {
   );
 }
 
+// ─── AwardsSection ────────────────────────────────────────────────────────────
+function AwardsSection() {
+  const featured = [
+    {
+      title: 'ACSL Silver',
+      org: 'American Computer Science League · International Finals',
+      desc: 'Top international finish in algorithmic computing. Advanced to ACSL All-Stars — the international round among national qualifiers worldwide.',
+      badge: 'International',
+    },
+    {
+      title: '1st Place — Gold',
+      org: 'Upper Arlington Hackathon · William & Carol Mohr STEM Lab, Ohio',
+      desc: 'First-place finish at the UA hackathon. End-to-end product execution under time constraints, evaluated by technical judges.',
+      badge: 'Gold',
+      image: founderTeam,
+    },
+  ];
+
+  const others = [
+    { title: 'National History Day', detail: 'National Level' },
+    { title: 'Continental Math League', detail: 'Top 1%' },
+    { title: 'DJMUNC (Model UN)', detail: 'Delegate' },
+    { title: 'Aspire Program', detail: 'Tutor' },
+  ];
+
+  return (
+    <section id="awards" className="relative bg-[#060606] pt-20 pb-28 md:pb-36">
+      <AnimatedDivider index="04" label="RECOGNITION" />
+
+      <div className="mx-auto max-w-7xl px-6 md:px-12 pt-16 md:pt-20">
+        <motion.div
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: '-60px' }}
+          variants={stagger(0, 0.09)}
+        >
+          <motion.div variants={fadeUp} transition={{ duration: 0.55, ease }}>
+            <SectionIndex num="04" label="Recognition" />
+            <h2
+              className="tracking-[-0.04em] text-white font-black"
+              style={{ fontSize: 'clamp(2rem,4.5vw,3.4rem)', fontWeight: 900, lineHeight: 1.05 }}
+            >
+              Competed. Won.
+              <span style={{ color: 'rgba(255,255,255,0.3)' }}> Internationally.</span>
+            </h2>
+          </motion.div>
+        </motion.div>
+
+        <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
+          {featured.map((award, i) => (
+            <motion.div
+              key={award.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.6, delay: i * 0.1, ease }}
+              className="h-full"
+            >
+              <TiltCard className="h-full cursor-default">
+                <div
+                  className="h-full rounded-sm p-6 bg-[#0A0A0A] ring-[1.5px] ring-white/[0.08] hover:ring-amber-400/25 transition-all duration-300"
+                >
+                  {award.image && (
+                    <div className="overflow-hidden rounded-sm mb-5" style={{ border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <img src={award.image} alt={award.title} className="w-full h-32 object-cover object-center" loading="lazy" />
+                    </div>
+                  )}
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-black text-white" style={{ fontWeight: 900, fontSize: 'clamp(1.1rem,1.8vw,1.4rem)' }}>
+                        {award.title}
+                      </p>
+                      <p className="mt-1 font-mono text-[10px] text-white/30">{award.org}</p>
+                    </div>
+                    <span
+                      className="shrink-0 font-mono text-[10px] px-2.5 py-1 rounded-sm text-amber-400/70"
+                      style={{ border: '1px solid rgba(245,158,11,0.20)', background: 'rgba(245,158,11,0.04)' }}
+                    >
+                      {award.badge}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-[15px] leading-relaxed text-white/72">{award.desc}</p>
+                </div>
+              </TiltCard>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.55, ease, delay: 0.3 }}
+          className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4"
+        >
+          {others.map((o) => (
+            <div
+              key={o.title}
+              className="rounded-sm p-4"
+              style={{ border: '1px solid rgba(255,255,255,0.06)', background: '#0A0A0A' }}
+            >
+              <p className="font-mono text-[11px] font-semibold text-white/50">{o.title}</p>
+              <p className="mt-1 font-mono text-[10px] text-white/25">{o.detail}</p>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─── OtherProjectsSection ─────────────────────────────────────────────────────
+function OtherProjectsSection() {
+  const projects = [
+    {
+      title: 'vtrendz.net',
+      role: 'SEO & GEO Specialist',
+      tagline: 'Implemented JSON-LD schema and optimized site architecture for Generative Engine Optimization (GEO) — built for discoverability in AI-driven search.',
+      stack: ['SEO', 'GEO', 'JSON-LD', 'Schema.org'],
+    },
+    {
+      title: 'The Equestrian WT',
+      role: 'Supply Chain & IT Management',
+      tagline: 'Operations and IT infrastructure for an equestrian retail brand — inventory, logistics, and e-commerce systems.',
+      stack: ['Operations', 'IT', 'E-commerce'],
+    },
+  ];
+
+  return (
+    <section id="more-projects" className="relative bg-[#060606] pt-20 pb-28 md:pb-36">
+      <AnimatedDivider index="06" label="MORE WORK" />
+
+      <div className="mx-auto max-w-7xl px-6 md:px-12 pt-16 md:pt-20">
+        <motion.div
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: '-60px' }}
+          variants={stagger(0, 0.09)}
+        >
+          <motion.div variants={fadeUp} transition={{ duration: 0.55, ease }}>
+            <SectionIndex num="06" label="More Work" />
+          </motion.div>
+
+          <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+            {projects.map((p, i) => (
+              <motion.div
+                key={p.title}
+                variants={fadeUp}
+                transition={{ duration: 0.65, ease, delay: i * 0.08 }}
+              >
+                <TiltCard className="h-full cursor-default">
+                  <div className="h-full rounded-sm p-6 bg-[#0A0A0A] ring-[1.5px] ring-white/[0.08] hover:ring-amber-400/20 transition-all duration-300">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/20 mb-2">{p.role}</p>
+                    <h3
+                      className="tracking-[-0.03em] text-white font-black"
+                      style={{ fontSize: 'clamp(1.1rem,1.8vw,1.4rem)', fontWeight: 900 }}
+                    >
+                      {p.title}
+                    </h3>
+                    <p className="mt-2 text-[15px] leading-relaxed text-white/40">{p.tagline}</p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {p.stack.map((t) => (
+                        <span
+                          key={t}
+                          className="rounded-sm font-mono text-[10px] px-2.5 py-1 text-white/28"
+                          style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.015)' }}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </TiltCard>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Portfolio ────────────────────────────────────────────────────────────────
 export function Portfolio() {
   return (
@@ -975,7 +1168,9 @@ export function Portfolio() {
       <LogicStepSection />
       <HydraSection />
       <FounderJournalSection />
+      <AwardsSection />
       <ServicesSection />
+      <OtherProjectsSection />
       <Footer />
     </div>
   );

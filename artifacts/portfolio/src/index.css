@@ -24,7 +24,7 @@
   }
 
   ::selection {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(245, 158, 11, 0.25);
     color: #fff;
   }
 
@@ -35,11 +35,11 @@
     background: #060606;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(245, 158, 11, 0.18);
     border-radius: 2px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(245, 158, 11, 0.35);
   }
 }
 
